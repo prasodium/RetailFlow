@@ -1,0 +1,12 @@
+node_modules
+# Keep environment variables out of version control
+.env
+
+# Prisma Client is generated from schema.prisma, not source
+/src/generated
+
+# AI assistant skill caches (not app code)
+/.agents
+/.claude
+/.windsurf
+skills-lock.json
