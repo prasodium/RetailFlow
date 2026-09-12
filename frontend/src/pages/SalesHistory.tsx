@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import api from "../services/api";
 
 interface Product {
   id: number;
@@ -28,6 +29,7 @@ interface Sale {
   total: string;
   paymentMethod: string;
   status: string;
+  source: "POS" | "ONLINE";
   createdAt: string;
   customer: Customer | null;
   items: SaleItem[];
@@ -43,14 +45,10 @@ export default function SalesHistory() {
 
   async function fetchSales() {
     try {
-      const response = await fetch(
-        "http://localhost:4000/api/sales"
-      );
+      const response = await api.get("/sales");
 
-      const result = await response.json();
-
-      if (result.success) {
-        setSales(result.data);
+      if (response.data.success) {
+        setSales(response.data.data);
       }
     } catch (error) {
       console.error("Failed to fetch sales", error);
@@ -110,6 +108,10 @@ export default function SalesHistory() {
                 </th>
 
                 <th className="text-left px-5 py-4">
+                  Source
+                </th>
+
+                <th className="text-left px-5 py-4">
                   Status
                 </th>
 
@@ -126,7 +128,7 @@ export default function SalesHistory() {
 
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="text-center py-10 text-zinc-500"
                   >
                     No sales found.
@@ -166,6 +168,18 @@ export default function SalesHistory() {
                     <td className="px-5 py-4">
                       <span className="px-2 py-1 rounded-md bg-zinc-100">
                         {sale.paymentMethod}
+                      </span>
+                    </td>
+
+                    <td className="px-5 py-4">
+                      <span
+                        className={`px-2 py-1 rounded-md text-xs font-medium ${
+                          sale.source === "ONLINE"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-zinc-100 text-zinc-600"
+                        }`}
+                      >
+                        {sale.source === "ONLINE" ? "Online" : "In-Store"}
                       </span>
                     </td>
 

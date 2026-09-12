@@ -5,6 +5,8 @@ import {
   CreditCard,
 } from "lucide-react";
 
+import { placeOrder } from "../api";
+import { useShopAuth } from "../context/ShopAuthContext";
 import type { CartItem } from "../types";
 
 interface CheckoutProps {
@@ -17,11 +19,12 @@ export default function Checkout({
   onClearCart,
 }: CheckoutProps) {
   const navigate = useNavigate();
+  const { customer } = useShopAuth();
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
+  const [name, setName] = useState(customer?.name ?? "");
+  const [email, setEmail] = useState(customer?.email ?? "");
+  const [phone, setPhone] = useState(customer?.phone ?? "");
+  const [address, setAddress] = useState(customer?.address ?? "");
 
   const [paymentMethod, setPaymentMethod] =
     useState<
@@ -48,69 +51,46 @@ export default function Checkout({
       return;
     }
 
-    if (!name.trim()) {
-      setError("Please enter your name.");
-      return;
-    }
+    if (!customer) {
+      if (!name.trim()) {
+        setError("Please enter your name.");
+        return;
+      }
 
-    if (!phone.trim()) {
-      setError("Please enter your phone number.");
-      return;
-    }
+      if (!phone.trim()) {
+        setError("Please enter your phone number.");
+        return;
+      }
 
-    if (!address.trim()) {
-      setError("Please enter your delivery address.");
-      return;
+      if (!address.trim()) {
+        setError("Please enter your delivery address.");
+        return;
+      }
     }
 
     try {
       setLoading(true);
       setError("");
 
-      /*
-       * For now, the online customer is not linked
-       * to a Customer record.
-       *
-       * We will add customer creation/linking next.
-       */
-
-      const response = await fetch(
-        "http://localhost:4000/api/sales",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        body: JSON.stringify({
-        customer: {
+      const order = await placeOrder({
+        ...(!customer && {
+          customer: {
             name: name.trim(),
             email: email.trim() || undefined,
             phone: phone.trim(),
             address: address.trim(),
-        },
+          },
+        }),
 
         paymentMethod,
 
-        discount: 0,
-
-        tax: 0,
+        shippingAddress: address.trim() || undefined,
 
         items: cart.map((item) => ({
-            productId: item.product.id,
-            quantity: item.quantity,
+          productId: item.product.id,
+          quantity: item.quantity,
         })),
-        }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(
-          result.message ||
-            "Failed to place order"
-        );
-      }
+      });
 
       /*
        * Store order information temporarily so
@@ -119,7 +99,7 @@ export default function Checkout({
 
       sessionStorage.setItem(
         "retailflow-last-order",
-        JSON.stringify(result.data)
+        JSON.stringify(order)
       );
 
       onClearCart();

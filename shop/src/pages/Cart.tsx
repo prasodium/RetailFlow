@@ -5,7 +5,9 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import type { CartItem } from "../types";
+import type { CartItem, Product } from "../types";
+import { resolveImageUrl } from "../lib/assets";
+import CartRecommendations from "../components/CartRecommendations";
 
 interface CartProps {
   cart: CartItem[];
@@ -18,12 +20,18 @@ interface CartProps {
   onRemove: (
     productId: number
   ) => void;
+
+  onAddToCart: (
+    product: Product,
+    quantity?: number
+  ) => void;
 }
 
 export default function Cart({
   cart,
   onUpdateQuantity,
   onRemove,
+  onAddToCart,
 }: CartProps) {
 
   const subtotal = cart.reduce(
@@ -85,10 +93,16 @@ export default function Cart({
                 className="bg-white border rounded-2xl p-5 flex gap-5"
               >
 
-                <div className="w-24 h-24 bg-zinc-100 rounded-xl flex items-center justify-center text-3xl font-bold text-zinc-400">
-                  {item.product.name
-                    .substring(0, 1)
-                    .toUpperCase()}
+                <div className="w-24 h-24 bg-zinc-100 rounded-xl flex items-center justify-center text-3xl font-bold text-zinc-400 overflow-hidden shrink-0">
+                  {resolveImageUrl(item.product.imageUrl) ? (
+                    <img
+                      src={resolveImageUrl(item.product.imageUrl)!}
+                      alt={item.product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    item.product.name.substring(0, 1).toUpperCase()
+                  )}
                 </div>
 
                 <div className="flex-1">
@@ -214,6 +228,8 @@ export default function Cart({
         </div>
 
       </div>
+
+      <CartRecommendations cart={cart} onAddToCart={onAddToCart} />
 
     </div>
   );

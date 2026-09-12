@@ -2,7 +2,9 @@ import { Link } from "react-router-dom";
 import {
   ShoppingCart,
   Search,
+  User,
 } from "lucide-react";
+import { useShopAuth } from "../context/ShopAuthContext";
 
 interface NavbarProps {
   cartCount: number;
@@ -11,6 +13,8 @@ interface NavbarProps {
 export default function Navbar({
   cartCount,
 }: NavbarProps) {
+  const { customer } = useShopAuth();
+
   return (
     <header className="border-b bg-white sticky top-0 z-50">
 
@@ -66,6 +70,17 @@ export default function Navbar({
                 {cartCount}
               </span>
             )}
+          </Link>
+
+          <Link
+            to={customer ? "/account" : "/login"}
+            className="flex items-center gap-2 p-2 hover:bg-zinc-100 rounded-lg"
+          >
+            <User size={21} />
+
+            <span className="hidden sm:inline text-sm text-zinc-600">
+              {customer ? customer.name.split(" ")[0] : "Sign In"}
+            </span>
           </Link>
 
         </div>

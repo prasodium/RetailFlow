@@ -10,13 +10,15 @@ import {
   useParams,
 } from "react-router-dom";
 
-import { getProduct } from "../api";
+import { getProduct, getProductRecommendations } from "../api";
+import RecommendedProducts from "../components/RecommendedProducts";
+import { resolveImageUrl } from "../lib/assets";
 import type { Product } from "../types";
 
 interface ProductDetailsProps {
   onAddToCart: (
     product: Product,
-    quantity: number
+    quantity?: number
   ) => void;
 }
 
@@ -28,6 +30,9 @@ export default function ProductDetails({
 
   const [product, setProduct] =
     useState<Product | null>(null);
+
+  const [recommended, setRecommended] =
+    useState<Product[]>([]);
 
   const [quantity, setQuantity] =
     useState(1);
@@ -43,6 +48,10 @@ export default function ProductDetails({
       .then(setProduct)
       .catch(console.error)
       .finally(() => setLoading(false));
+
+    getProductRecommendations(Number(id))
+      .then(setRecommended)
+      .catch(console.error);
 
   }, [id]);
 
@@ -80,21 +89,29 @@ export default function ProductDetails({
 
         {/* Image */}
 
-        <div className="h-[450px] bg-gradient-to-br from-zinc-100 to-zinc-200 rounded-2xl flex items-center justify-center">
+        <div className="h-[450px] bg-gradient-to-br from-zinc-100 to-zinc-200 rounded-2xl flex items-center justify-center overflow-hidden">
 
-          <div className="text-zinc-400 text-center">
+          {resolveImageUrl(product.imageUrl) ? (
+            <img
+              src={resolveImageUrl(product.imageUrl)!}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="text-zinc-400 text-center">
 
-            <div className="text-8xl font-bold">
-              {product.name
-                .substring(0, 1)
-                .toUpperCase()}
+              <div className="text-8xl font-bold">
+                {product.name
+                  .substring(0, 1)
+                  .toUpperCase()}
+              </div>
+
+              <p className="mt-3">
+                {product.sku}
+              </p>
+
             </div>
-
-            <p className="mt-3">
-              {product.sku}
-            </p>
-
-          </div>
+          )}
 
         </div>
 
@@ -201,6 +218,12 @@ export default function ProductDetails({
         </div>
 
       </div>
+
+      <RecommendedProducts
+        title="You May Also Like"
+        products={recommended}
+        onAddToCart={onAddToCart}
+      />
 
     </div>
   );

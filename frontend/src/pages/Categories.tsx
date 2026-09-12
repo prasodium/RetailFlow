@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Plus, Folder, X } from "lucide-react";
+import api from "../services/api";
 
 interface Category {
   id: number;
@@ -29,14 +30,10 @@ export default function Categories() {
     try {
       setLoading(true);
 
-      const response = await fetch(
-        "http://localhost:4000/api/categories"
-      );
+      const response = await api.get("/categories");
 
-      const result = await response.json();
-
-      if (result.success) {
-        setCategories(result.data);
+      if (response.data.success) {
+        setCategories(response.data.data);
       }
     } catch (error) {
       console.error("Failed to fetch categories", error);
@@ -60,30 +57,13 @@ export default function Categories() {
       setSaving(true);
       setError("");
 
-      const response = await fetch(
-        "http://localhost:4000/api/categories",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: name.trim(),
-            description: description.trim() || undefined,
-          }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(
-          result.message || "Failed to create category"
-        );
-      }
+      const response = await api.post("/categories", {
+        name: name.trim(),
+        description: description.trim() || undefined,
+      });
 
       setCategories((current) =>
-        [...current, result.data].sort((a, b) =>
+        [...current, response.data.data].sort((a, b) =>
           a.name.localeCompare(b.name)
         )
       );
@@ -91,13 +71,11 @@ export default function Categories() {
       setName("");
       setDescription("");
       setShowModal(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
 
       setError(
-        error instanceof Error
-          ? error.message
-          : "Failed to create category"
+        error?.response?.data?.message || "Failed to create category"
       );
     } finally {
       setSaving(false);

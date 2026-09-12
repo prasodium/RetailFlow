@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Search,
   Plus,
   X,
   Pencil,
   Trash2,
+  ImagePlus,
 } from "lucide-react";
 
 import {
@@ -12,6 +13,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  uploadProductImage,
   type Product,
   type CreateProductInput,
 } from "../services/productService";
@@ -20,6 +22,8 @@ import {
   getCategories,
   type Category,
 } from "../services/categoryService";
+
+import { resolveImageUrl } from "../lib/assets";
 
 export default function Products() {
   // ============================================================
@@ -43,6 +47,43 @@ export default function Products() {
     costPrice: 0,
     categoryId: 0,
   });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadTargetId, setUploadTargetId] = useState<number | null>(null);
+  const [uploadingId, setUploadingId] = useState<number | null>(null);
+
+  function triggerImageUpload(productId: number) {
+    setUploadTargetId(productId);
+    fileInputRef.current?.click();
+  }
+
+  async function handleImageSelected(
+    e: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+
+    if (!file || uploadTargetId === null) {
+      return;
+    }
+
+    try {
+      setUploadingId(uploadTargetId);
+
+      await uploadProductImage(uploadTargetId, file);
+
+      await loadProducts();
+    } catch (error: any) {
+      console.error(error);
+
+      alert(
+        error?.response?.data?.message || "Failed to upload image"
+      );
+    } finally {
+      setUploadingId(null);
+      setUploadTargetId(null);
+    }
+  }
 
   // ============================================================
   // LOAD PRODUCTS
@@ -227,6 +268,14 @@ export default function Products() {
   return (
     <div className="space-y-6">
 
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={handleImageSelected}
+      />
+
       {/* ========================================================
           HEADER
       ======================================================== */}
@@ -294,6 +343,10 @@ export default function Products() {
             <thead className="bg-gray-50 border-b">
               <tr>
                 <th className="text-left px-6 py-4">
+                  Image
+                </th>
+
+                <th className="text-left px-6 py-4">
                   Product
                 </th>
 
@@ -348,6 +401,38 @@ export default function Products() {
                     key={product.id}
                     className="hover:bg-gray-50"
                   >
+
+                    {/* IMAGE */}
+
+                    <td className="px-6 py-4">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          triggerImageUpload(product.id)
+                        }
+                        title="Upload image"
+                        className="relative w-12 h-12 rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center hover:border-blue-400"
+                      >
+                        {resolveImageUrl(product.imageUrl) ? (
+                          <img
+                            src={resolveImageUrl(product.imageUrl)!}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <ImagePlus
+                            size={18}
+                            className="text-gray-400"
+                          />
+                        )}
+
+                        {uploadingId === product.id && (
+                          <span className="absolute inset-0 bg-white/70 flex items-center justify-center text-[10px] font-medium text-gray-600">
+                            ...
+                          </span>
+                        )}
+                      </button>
+                    </td>
 
                     {/* PRODUCT */}
 

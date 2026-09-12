@@ -5,6 +5,8 @@ import {
 } from "react-router-dom";
 import { useEffect, useState } from "react";
 
+import { ShopAuthProvider } from "./context/ShopAuthContext";
+import RequireCustomerAuth from "./components/RequireCustomerAuth";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
@@ -12,13 +14,17 @@ import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Account from "./pages/Account";
+import OrderDetail from "./pages/OrderDetail";
 
 import type {
   CartItem,
   Product,
 } from "./types";
 
-export default function App() {
+function AppShell() {
 
   const [cart, setCart] =
     useState<CartItem[]>(() => {
@@ -175,6 +181,7 @@ export default function App() {
                 onRemove={
                   removeFromCart
                 }
+                onAddToCart={addToCart}
               />
             }
           />
@@ -194,10 +201,29 @@ export default function App() {
             element={<OrderSuccess />}
           />
 
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+
+          <Route element={<RequireCustomerAuth />}>
+            <Route path="/account" element={<Account />} />
+            <Route
+              path="/account/orders/:id"
+              element={<OrderDetail />}
+            />
+          </Route>
+
         </Routes>
 
       </main>
 
     </BrowserRouter>
+  );
+}
+
+export default function App() {
+  return (
+    <ShopAuthProvider>
+      <AppShell />
+    </ShopAuthProvider>
   );
 }

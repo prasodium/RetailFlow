@@ -4,6 +4,8 @@ import {
   getProductById,
   getProducts,
   updateProduct,
+  updateProductImage,
+  recordProductView,
   deleteProduct,
 } from "./product.service.js";
 
@@ -51,6 +53,10 @@ export async function getProduct(
       });
     }
 
+    if (req.customer) {
+      recordProductView(req.customer.id, id).catch(console.error);
+    }
+
     res.json({
       success: true,
       data: product,
@@ -61,6 +67,45 @@ export async function getProduct(
     res.status(500).json({
       success: false,
       message: "Failed to fetch product",
+    });
+  }
+}
+
+export async function uploadProductImage(
+  req: Request,
+  res: Response
+) {
+  try {
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "An image file is required",
+      });
+    }
+
+    const imageUrl = `/uploads/products/${req.file.filename}`;
+
+    const product = await updateProductImage(id, imageUrl);
+
+    res.json({
+      success: true,
+      data: product,
+    });
+  } catch (error: any) {
+    console.error(error);
+
+    res.status(400).json({
+      success: false,
+      message: error?.message || "Failed to upload image",
     });
   }
 }

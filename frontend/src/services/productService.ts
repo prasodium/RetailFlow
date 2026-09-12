@@ -1,6 +1,4 @@
-import axios from "axios";
-
-const API_URL = "http://localhost:4000/api";
+import api from "./api";
 
 export interface Product {
   id: number;
@@ -9,6 +7,7 @@ export interface Product {
   description: string | null;
   price: string;
   costPrice: string;
+  imageUrl: string | null;
   categoryId: number;
 
   category: {
@@ -29,7 +28,7 @@ export interface Product {
 }
 
 export async function getProducts(): Promise<Product[]> {
-  const response = await axios.get(`${API_URL}/products`);
+  const response = await api.get("/products");
 
   return response.data.data;
 }
@@ -37,7 +36,7 @@ export async function getProducts(): Promise<Product[]> {
 export async function getProductById(
   id: number
 ): Promise<Product> {
-  const response = await axios.get(`${API_URL}/products/${id}`);
+  const response = await api.get(`/products/${id}`);
 
   return response.data.data;
 }
@@ -54,10 +53,7 @@ export interface CreateProductInput {
 export async function createProduct(
   product: CreateProductInput
 ): Promise<Product> {
-  const response = await axios.post(
-    `${API_URL}/products`,
-    product
-  );
+  const response = await api.post("/products", product);
 
   return response.data.data;
 }
@@ -75,10 +71,7 @@ export async function updateProduct(
   id: number,
   product: UpdateProductInput
 ): Promise<Product> {
-  const response = await axios.put(
-    `${API_URL}/products/${id}`,
-    product
-  );
+  const response = await api.put(`/products/${id}`, product);
 
   return response.data.data;
 }
@@ -86,5 +79,28 @@ export async function updateProduct(
 export async function deleteProduct(
   id: number
 ): Promise<void> {
-  await axios.delete(`${API_URL}/products/${id}`);
+  await api.delete(`/products/${id}`);
+}
+
+export async function uploadProductImage(
+  id: number,
+  file: File
+): Promise<Product> {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const response = await api.post(
+    `/products/${id}/image`,
+    formData,
+    {
+      // Let the browser set the multipart boundary itself — overriding
+      // the shared instance's default JSON Content-Type would otherwise
+      // send the body without one, which the server can't parse.
+      headers: {
+        "Content-Type": undefined,
+      },
+    }
+  );
+
+  return response.data.data;
 }

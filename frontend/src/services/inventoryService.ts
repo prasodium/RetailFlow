@@ -1,6 +1,4 @@
-import axios from "axios";
-
-const API_URL = "http://localhost:4000/api";
+import api from "./api";
 
 export interface InventoryProduct {
   id: number;
@@ -42,21 +40,18 @@ export interface InventoryTransaction {
 export interface InventoryStats {
   totalProducts: number;
   totalUnits: number;
-  lowStockCount: number;
+  lowStockProducts: number;
+  outOfStockProducts: number;
 }
 
 export async function getInventory(): Promise<Inventory[]> {
-  const response = await axios.get(
-    `${API_URL}/inventory`
-  );
+  const response = await api.get("/inventory");
 
   return response.data.data;
 }
 
 export async function getInventoryStats(): Promise<InventoryStats> {
-  const response = await axios.get(
-    `${API_URL}/inventory/stats`
-  );
+  const response = await api.get("/inventory/stats");
 
   return response.data.data;
 }
@@ -64,9 +59,7 @@ export async function getInventoryStats(): Promise<InventoryStats> {
 export async function getLowStockInventory(): Promise<
   Inventory[]
 > {
-  const response = await axios.get(
-    `${API_URL}/inventory/low-stock`
-  );
+  const response = await api.get("/inventory/low-stock");
 
   return response.data.data;
 }
@@ -74,8 +67,8 @@ export async function getLowStockInventory(): Promise<
 export async function getProductInventory(
   productId: number
 ) {
-  const response = await axios.get(
-    `${API_URL}/inventory/product/${productId}`
+  const response = await api.get(
+    `/inventory/product/${productId}`
   );
 
   return response.data.data;
@@ -86,8 +79,8 @@ export async function stockIn(
   quantity: number,
   note?: string
 ) {
-  const response = await axios.post(
-    `${API_URL}/inventory/product/${productId}/stock-in`,
+  const response = await api.post(
+    `/inventory/product/${productId}/stock-in`,
     {
       quantity,
       note,
@@ -102,8 +95,8 @@ export async function stockOut(
   quantity: number,
   note?: string
 ) {
-  const response = await axios.post(
-    `${API_URL}/inventory/product/${productId}/stock-out`,
+  const response = await api.post(
+    `/inventory/product/${productId}/stock-out`,
     {
       quantity,
       note,

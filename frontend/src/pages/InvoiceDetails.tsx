@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import api from "../services/api";
 
 interface Product {
   id: number;
@@ -31,6 +32,9 @@ interface Sale {
   total: string;
   paymentMethod: string;
   status: string;
+  source: "POS" | "ONLINE";
+  orderStatus: string | null;
+  shippingAddress: string | null;
   createdAt: string;
   customer: Customer | null;
   items: SaleItem[];
@@ -49,14 +53,10 @@ export default function InvoiceDetails() {
 
   async function fetchSale() {
     try {
-      const response = await fetch(
-        `http://localhost:4000/api/sales/${id}`
-      );
+      const response = await api.get(`/sales/${id}`);
 
-      const result = await response.json();
-
-      if (result.success) {
-        setSale(result.data);
+      if (response.data.success) {
+        setSale(response.data.data);
       }
     } catch (error) {
       console.error("Failed to fetch invoice", error);
@@ -351,6 +351,32 @@ export default function InvoiceDetails() {
           </div>
 
         </div>
+
+        {sale.source === "ONLINE" && (
+          <div className="border-t mt-6 pt-6 flex justify-between">
+
+            <div>
+              <p className="text-sm text-zinc-500">
+                Shipping Address
+              </p>
+
+              <p className="font-medium">
+                {sale.shippingAddress || "—"}
+              </p>
+            </div>
+
+            <div className="text-right">
+              <p className="text-sm text-zinc-500">
+                Fulfillment Status
+              </p>
+
+              <p className="font-medium text-blue-600">
+                {sale.orderStatus ?? "PENDING"}
+              </p>
+            </div>
+
+          </div>
+        )}
 
       </div>
 

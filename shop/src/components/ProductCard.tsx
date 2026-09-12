@@ -4,6 +4,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Product } from "../types";
+import { resolveImageUrl } from "../lib/assets";
 
 interface ProductCardProps {
   product: Product;
@@ -21,6 +22,7 @@ export default function ProductCard({
     product.inventory?.quantity ?? 0;
 
   const outOfStock = stock <= 0;
+  const imageUrl = resolveImageUrl(product.imageUrl);
 
   return (
     <div className="group bg-white border border-zinc-200 rounded-2xl overflow-hidden hover:shadow-lg transition">
@@ -32,13 +34,21 @@ export default function ProductCard({
         className="block"
       >
 
-        <div className="h-52 bg-gradient-to-br from-zinc-100 to-zinc-200 flex items-center justify-center">
+        <div className="h-52 bg-gradient-to-br from-zinc-100 to-zinc-200 flex items-center justify-center overflow-hidden">
 
-          <Package
-            size={70}
-            strokeWidth={1}
-            className="text-zinc-400 group-hover:scale-110 transition"
-          />
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={product.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition"
+            />
+          ) : (
+            <Package
+              size={70}
+              strokeWidth={1}
+              className="text-zinc-400 group-hover:scale-110 transition"
+            />
+          )}
 
         </div>
 

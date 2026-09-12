@@ -7,15 +7,17 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { getProducts } from "../api";
+import { getHomeRecommendations, getProducts } from "../api";
 import ProductCard from "../components/ProductCard";
+import RecommendedProducts from "../components/RecommendedProducts";
 import type {
   Product,
 } from "../types";
 
 interface HomeProps {
   onAddToCart: (
-    product: Product
+    product: Product,
+    quantity?: number
   ) => void;
 }
 
@@ -26,9 +28,16 @@ export default function Home({
   const [products, setProducts] =
     useState<Product[]>([]);
 
+  const [recommended, setRecommended] =
+    useState<Product[]>([]);
+
   useEffect(() => {
     getProducts()
       .then(setProducts)
+      .catch(console.error);
+
+    getHomeRecommendations()
+      .then(setRecommended)
       .catch(console.error);
   }, []);
 
@@ -172,6 +181,14 @@ export default function Home({
 
         </div>
 
+      </section>
+
+      <section className="max-w-7xl mx-auto px-6 pb-16">
+        <RecommendedProducts
+          title="Recommended for You"
+          products={recommended}
+          onAddToCart={onAddToCart}
+        />
       </section>
 
     </div>

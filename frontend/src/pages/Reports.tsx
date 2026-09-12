@@ -5,6 +5,7 @@ import {
   TrendingUp,
   CreditCard,
 } from "lucide-react";
+import api from "../services/api";
 
 interface SalesSummary {
   totalSales: number;
@@ -61,42 +62,26 @@ export default function Reports() {
         paymentsResponse,
         profitResponse,
       ] = await Promise.all([
-        fetch(
-          "http://localhost:4000/api/reports/sales-summary"
-        ),
-        fetch(
-          "http://localhost:4000/api/reports/top-products"
-        ),
-        fetch(
-          "http://localhost:4000/api/reports/payments"
-        ),
-        fetch(
-          "http://localhost:4000/api/reports/profit"
-        ),
+        api.get("/reports/sales-summary"),
+        api.get("/reports/top-products"),
+        api.get("/reports/payments"),
+        api.get("/reports/profit"),
       ]);
 
-      const salesResult = await salesResponse.json();
-      const productsResult =
-        await productsResponse.json();
-      const paymentsResult =
-        await paymentsResponse.json();
-      const profitResult =
-        await profitResponse.json();
-
-      if (salesResult.success) {
-        setSalesSummary(salesResult.data);
+      if (salesResponse.data.success) {
+        setSalesSummary(salesResponse.data.data);
       }
 
-      if (productsResult.success) {
-        setTopProducts(productsResult.data);
+      if (productsResponse.data.success) {
+        setTopProducts(productsResponse.data.data);
       }
 
-      if (paymentsResult.success) {
-        setPayments(paymentsResult.data);
+      if (paymentsResponse.data.success) {
+        setPayments(paymentsResponse.data.data);
       }
 
-      if (profitResult.success) {
-        setProfit(profitResult.data);
+      if (profitResponse.data.success) {
+        setProfit(profitResponse.data.data);
       }
     } catch (error) {
       console.error(

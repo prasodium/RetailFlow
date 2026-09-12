@@ -3,6 +3,7 @@ import {
   Package,
   Warehouse,
   ShoppingCart,
+  Truck,
   Users,
   Tags,
   BarChart3,
@@ -31,6 +32,11 @@ const menuItems = [
     name: "Sales",
     path: "/sales",
     icon: ShoppingCart,
+  },
+  {
+    name: "Online Orders",
+    path: "/orders",
+    icon: Truck,
   },
   {
     name: "Customers",

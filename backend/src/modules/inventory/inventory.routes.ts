@@ -8,8 +8,11 @@ import {
   listLowStockInventory,
   removeStock,
 } from "./inventory.controller.js";
+import { requireStaffAuth } from "../../middleware/auth.middleware.js";
 
 const router = Router();
+
+router.use(requireStaffAuth);
 
 router.get("/", listInventory);
 router.get("/stats", inventoryStats);

@@ -6,8 +6,11 @@ import {
   salesSummary,
   topProducts,
 } from "./report.controller.js";
+import { requireStaffAuth } from "../../middleware/auth.middleware.js";
 
 const router = Router();
+
+router.use(requireStaffAuth);
 
 router.get("/sales-summary", salesSummary);
 router.get("/top-products", topProducts);

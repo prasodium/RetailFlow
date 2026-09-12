@@ -8,8 +8,11 @@ import {
   listCustomers,
   updateCustomerController,
 } from "./customer.controller.js";
+import { requireStaffAuth } from "../../middleware/auth.middleware.js";
 
 const router = Router();
+
+router.use(requireStaffAuth);
 
 router.post("/", createCustomerController);
 

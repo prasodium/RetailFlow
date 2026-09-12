@@ -95,6 +95,54 @@ export async function updateProduct(
     },
   });
 }
+export async function updateProductImage(id: number, imageUrl: string) {
+  const product = await prisma.product.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!product) {
+    throw new Error("Product not found");
+  }
+
+  return prisma.product.update({
+    where: {
+      id,
+    },
+    data: {
+      imageUrl,
+    },
+    include: {
+      category: true,
+      inventory: true,
+    },
+  });
+}
+
+export async function recordProductView(
+  customerId: number,
+  productId: number
+) {
+  return prisma.productView.upsert({
+    where: {
+      customerId_productId: {
+        customerId,
+        productId,
+      },
+    },
+    update: {
+      viewCount: {
+        increment: 1,
+      },
+    },
+    create: {
+      customerId,
+      productId,
+    },
+  });
+}
+
 export async function deleteProduct(id: number) {
   const product = await prisma.product.findUnique({
     where: {

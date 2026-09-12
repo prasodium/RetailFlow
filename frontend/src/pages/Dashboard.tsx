@@ -7,6 +7,7 @@ import {
   IndianRupee,
   AlertTriangle,
 } from "lucide-react";
+import api from "../services/api";
 
 interface InventoryStats {
   totalProducts: number;
@@ -58,25 +59,21 @@ export default function Dashboard() {
         salesResponse,
         lowStockResponse,
       ] = await Promise.all([
-        fetch("http://localhost:4000/api/inventory/stats"),
-        fetch("http://localhost:4000/api/sales"),
-        fetch("http://localhost:4000/api/inventory/low-stock"),
+        api.get("/inventory/stats"),
+        api.get("/sales"),
+        api.get("/inventory/low-stock"),
       ]);
 
-      const statsResult = await statsResponse.json();
-      const salesResult = await salesResponse.json();
-      const lowStockResult = await lowStockResponse.json();
-
-      if (statsResult.success) {
-        setStats(statsResult.data);
+      if (statsResponse.data.success) {
+        setStats(statsResponse.data.data);
       }
 
-      if (salesResult.success) {
-        setSales(salesResult.data);
+      if (salesResponse.data.success) {
+        setSales(salesResponse.data.data);
       }
 
-      if (lowStockResult.success) {
-        setLowStock(lowStockResult.data);
+      if (lowStockResponse.data.success) {
+        setLowStock(lowStockResponse.data.data);
       }
     } catch (error) {
       console.error(

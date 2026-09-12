@@ -5,6 +5,9 @@ node_modules
 # Prisma Client is generated from schema.prisma, not source
 /src/generated
 
+# Uploaded product images (local dev storage)
+/public/uploads
+
 # AI assistant skill caches (not app code)
 /.agents
 /.claude

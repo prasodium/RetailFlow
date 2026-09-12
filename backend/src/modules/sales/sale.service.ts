@@ -26,8 +26,28 @@ interface CreateSaleInput {
   discount?: number;
   tax?: number;
 
+  source?: "POS" | "ONLINE";
+  shippingAddress?: string;
+
   items: SaleItemInput[];
 }
+
+export type OrderStatusValue =
+  | "PENDING"
+  | "CONFIRMED"
+  | "PACKED"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "CANCELLED";
+
+const ORDER_STATUS_TRANSITIONS: Record<OrderStatusValue, OrderStatusValue[]> = {
+  PENDING: ["CONFIRMED", "CANCELLED"],
+  CONFIRMED: ["PACKED", "CANCELLED"],
+  PACKED: ["SHIPPED", "CANCELLED"],
+  SHIPPED: ["DELIVERED"],
+  DELIVERED: [],
+  CANCELLED: [],
+};
 
 function generateInvoiceNumber() {
   const timestamp = Date.now();
@@ -143,6 +163,10 @@ export async function createSale(input: CreateSaleInput) {
 
     const total = subtotal - discount + tax;
 
+    const source = input.source ?? "POS";
+    const orderStatus: OrderStatusValue =
+      source === "ONLINE" ? "PENDING" : "DELIVERED";
+
     const sale = await tx.sale.create({
         data: {
         invoiceNumber: generateInvoiceNumber(),
@@ -157,6 +181,10 @@ export async function createSale(input: CreateSaleInput) {
         total,
 
         paymentMethod: input.paymentMethod,
+
+        source,
+        orderStatus,
+        shippingAddress: input.shippingAddress ?? null,
 
         items: {
             create: saleItems.map((item) => ({
@@ -207,8 +235,11 @@ export async function createSale(input: CreateSaleInput) {
     return sale;
   });
 }
-export async function getSales() {
+export async function getSales(filter?: { source?: "POS" | "ONLINE" }) {
   return prisma.sale.findMany({
+    where: {
+      ...(filter?.source && { source: filter.source }),
+    },
     include: {
       customer: true,
       items: {
@@ -219,6 +250,51 @@ export async function getSales() {
     },
     orderBy: {
       createdAt: "desc",
+    },
+  });
+}
+
+export async function updateOrderStatus(
+  id: number,
+  newStatus: OrderStatusValue
+) {
+  const sale = await prisma.sale.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!sale) {
+    throw new Error("Sale not found");
+  }
+
+  if (sale.source !== "ONLINE") {
+    throw new Error("Only online orders have a fulfillment status");
+  }
+
+  const currentStatus = (sale.orderStatus ?? "PENDING") as OrderStatusValue;
+  const allowed = ORDER_STATUS_TRANSITIONS[currentStatus];
+
+  if (!allowed.includes(newStatus)) {
+    throw new Error(
+      `Cannot move an order from ${currentStatus} to ${newStatus}`
+    );
+  }
+
+  return prisma.sale.update({
+    where: {
+      id,
+    },
+    data: {
+      orderStatus: newStatus,
+    },
+    include: {
+      customer: true,
+      items: {
+        include: {
+          product: true,
+        },
+      },
     },
   });
 }

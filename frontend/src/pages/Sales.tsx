@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import api from "../services/api";
 
 interface Product {
   id: number;
@@ -47,14 +48,10 @@ export default function Sales() {
 
   async function fetchProducts() {
     try {
-      const response = await fetch(
-        "http://localhost:4000/api/products"
-      );
+      const response = await api.get("/products");
 
-      const result = await response.json();
-
-      if (result.success) {
-        setProducts(result.data);
+      if (response.data.success) {
+        setProducts(response.data.data);
       }
     } catch (error) {
       console.error("Failed to fetch products", error);
@@ -65,19 +62,9 @@ export default function Sales() {
 
   async function fetchCustomers() {
     try {
-      const response = await fetch(
-        "http://localhost:4000/api/customers"
-      );
+      const response = await api.get("/customers");
 
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(
-          result.message || "Failed to fetch customers"
-        );
-      }
-
-      setCustomers(result.data);
+      setCustomers(response.data.data);
     } catch (error) {
       console.error("Failed to fetch customers", error);
     }
@@ -192,42 +179,24 @@ export default function Sales() {
     setProcessing(true);
 
     try {
-      const response = await fetch(
-        "http://localhost:4000/api/sales",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+      const response = await api.post("/sales", {
+        // Walk-in customer = no customerId
+        ...(selectedCustomerId !== null && {
+          customerId: selectedCustomerId,
+        }),
 
-          body: JSON.stringify({
-            // Walk-in customer = no customerId
-            ...(selectedCustomerId !== null && {
-              customerId: selectedCustomerId,
-            }),
+        paymentMethod,
+        discount,
+        tax,
 
-            paymentMethod,
-            discount,
-            tax,
-
-            items: cart.map((item) => ({
-              productId: item.product.id,
-              quantity: item.quantity,
-            })),
-          }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(
-          result.message || "Failed to complete sale"
-        );
-      }
+        items: cart.map((item) => ({
+          productId: item.product.id,
+          quantity: item.quantity,
+        })),
+      });
 
       alert(
-        `Sale completed successfully!\nInvoice: ${result.data.invoiceNumber}`
+        `Sale completed successfully!\nInvoice: ${response.data.data.invoiceNumber}`
       );
 
       // Reset sale
@@ -240,13 +209,11 @@ export default function Sales() {
 
       // Refresh products to get updated stock
       await fetchProducts();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
 
       alert(
-        error instanceof Error
-          ? error.message
-          : "Failed to complete sale"
+        error?.response?.data?.message || "Failed to complete sale"
       );
     } finally {
       setProcessing(false);

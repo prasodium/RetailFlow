@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import api from "../services/api";
 
 interface Customer {
   id: number;
@@ -34,14 +35,10 @@ export default function Customers() {
 
   async function fetchCustomers() {
     try {
-      const response = await fetch(
-        "http://localhost:4000/api/customers"
-      );
+      const response = await api.get("/customers");
 
-      const result = await response.json();
-
-      if (result.success) {
-        setCustomers(result.data);
+      if (response.data.success) {
+        setCustomers(response.data.data);
       }
     } catch (error) {
       console.error("Failed to fetch customers", error);
@@ -92,42 +89,28 @@ export default function Customers() {
     setSaving(true);
 
     try {
-      const url = editingCustomer
-        ? `http://localhost:4000/api/customers/${editingCustomer.id}`
-        : "http://localhost:4000/api/customers";
+      const payload = {
+        name: form.name.trim(),
+        email: form.email.trim() || undefined,
+        phone: form.phone.trim() || undefined,
+        address: form.address.trim() || undefined,
+      };
 
-      const response = await fetch(url, {
-        method: editingCustomer ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: form.name.trim(),
-          email: form.email.trim() || undefined,
-          phone: form.phone.trim() || undefined,
-          address: form.address.trim() || undefined,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(
-          result.message || "Failed to save customer"
-        );
+      if (editingCustomer) {
+        await api.put(`/customers/${editingCustomer.id}`, payload);
+      } else {
+        await api.post("/customers", payload);
       }
 
       setShowModal(false);
       setEditingCustomer(null);
 
       await fetchCustomers();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
 
       alert(
-        error instanceof Error
-          ? error.message
-          : "Failed to save customer"
+        error?.response?.data?.message || "Failed to save customer"
       );
     } finally {
       setSaving(false);
@@ -142,29 +125,14 @@ export default function Customers() {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(
-        `http://localhost:4000/api/customers/${customer.id}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(
-          result.message || "Failed to delete customer"
-        );
-      }
+      await api.delete(`/customers/${customer.id}`);
 
       await fetchCustomers();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
 
       alert(
-        error instanceof Error
-          ? error.message
-          : "Failed to delete customer"
+        error?.response?.data?.message || "Failed to delete customer"
       );
     }
   }

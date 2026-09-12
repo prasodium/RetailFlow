@@ -11,6 +11,7 @@ export interface Product {
   description: string | null;
   price: string;
   costPrice: string;
+  imageUrl: string | null;
   categoryId: number;
   category: Category;
   inventory?: Inventory | null;
@@ -41,6 +42,14 @@ export interface Customer {
   phone: string | null;
 }
 
+export type OrderStatus =
+  | "PENDING"
+  | "CONFIRMED"
+  | "PACKED"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "CANCELLED";
+
 export interface Sale {
   id: number;
   invoiceNumber: string;
@@ -51,6 +60,9 @@ export interface Sale {
   total: string;
   paymentMethod: "CASH" | "CARD" | "UPI" | "BANK_TRANSFER";
   status: string;
+  source: "POS" | "ONLINE";
+  orderStatus: OrderStatus | null;
+  shippingAddress: string | null;
   createdAt: string;
   customer: Customer | null;
   items: SaleItem[];
