@@ -8,6 +8,30 @@ import {
   recordProductView,
   deleteProduct,
 } from "./product.service.js";
+import { getBestSellingProducts } from "../recommendations/recommendation.service.js";
+
+export async function popularProducts(
+  req: Request,
+  res: Response
+) {
+  try {
+    const limit = Math.min(Number(req.query.limit) || 20, 50);
+
+    const products = await getBestSellingProducts(limit);
+
+    res.json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch popular products",
+    });
+  }
+}
 
 export async function listProducts(
   _req: Request,

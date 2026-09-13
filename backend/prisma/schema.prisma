@@ -84,6 +84,7 @@ model Product {
   inventory   Inventory?
   saleItems   SaleItem[]
   views       ProductView[]
+  analyticsEvents AnalyticsEvent[]
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -126,6 +127,7 @@ model Customer {
 
   sales     Sale[]
   views     ProductView[]
+  analyticsEvents AnalyticsEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -190,4 +192,26 @@ model ProductView {
 
   @@unique([customerId, productId])
   @@index([customerId, updatedAt])
+}
+
+model AnalyticsEvent {
+  id         Int       @id @default(autoincrement())
+
+  eventType  String
+
+  sessionId  String
+
+  customerId Int?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+  productId  Int?
+  product    Product?  @relation(fields: [productId], references: [id])
+
+  device     String?
+  metadata   Json?
+
+  createdAt  DateTime  @default(now())
+
+  @@index([eventType, createdAt])
+  @@index([sessionId])
 }

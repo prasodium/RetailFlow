@@ -4,6 +4,7 @@ import {
   addProduct,
   getProduct,
   listProducts,
+  popularProducts,
   updateProductController,
   deleteProductController,
   uploadProductImage,
@@ -17,6 +18,8 @@ import { productImageUpload } from "../../middleware/upload.middleware.js";
 const router = Router();
 
 router.get("/", listProducts);
+
+router.get("/popular", popularProducts);
 
 router.get("/:id", optionalCustomerAuth, getProduct);
 

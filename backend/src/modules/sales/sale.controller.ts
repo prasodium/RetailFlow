@@ -7,6 +7,7 @@ import {
   updateOrderStatus,
   type OrderStatusValue,
 } from "./sale.service.js";
+import { recordEvents } from "../analytics/analytics.service.js";
 
 const VALID_ORDER_STATUSES: OrderStatusValue[] = [
   "PENDING",
@@ -95,6 +96,19 @@ export async function updateOrderStatusController(
     }
 
     const sale = await updateOrderStatus(id, orderStatus);
+
+    if (orderStatus === "CANCELLED") {
+      // Fire-and-forget: staff-initiated, so there's no browser session —
+      // use a synthetic per-staff session id instead.
+      recordEvents([
+        {
+          eventType: "order_cancelled",
+          sessionId: `staff-${req.staff!.id}`,
+          ...(sale.customerId !== null && { customerId: sale.customerId }),
+          metadata: { saleId: sale.id, invoiceNumber: sale.invoiceNumber },
+        },
+      ]).catch((error) => console.error("Failed to record order_cancelled:", error));
+    }
 
     res.json({
       success: true,

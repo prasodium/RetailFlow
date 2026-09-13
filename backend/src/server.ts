@@ -12,6 +12,7 @@ import reportRoutes from "./modules/reports/report.routes.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import orderRoutes from "./modules/orders/orders.routes.js";
 import recommendationRoutes from "./modules/recommendations/recommendation.routes.js";
+import analyticsRoutes from "./modules/analytics/analytics.routes.js";
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use("/api/reports", reportRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/recommendations", recommendationRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 app.get("/api/health", async (_req, res) => {
   try {

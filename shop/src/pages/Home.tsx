@@ -8,10 +8,19 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { getCategories, getHomeRecommendations, getProducts } from "../api";
+import {
+  getCategories,
+  getHomeRecommendations,
+  getPopularProducts,
+  getProductRecommendations,
+  getProducts,
+  getRecentlyViewed,
+} from "../api";
 import ProductCard from "../components/ProductCard";
 import RecommendedProducts from "../components/RecommendedProducts";
 import TextType from "../components/TextType";
+import { track } from "../lib/analytics";
+import { useShopAuth } from "../context/ShopAuthContext";
 import type {
   Category,
   Product,
@@ -28,6 +37,8 @@ export default function Home({
   onAddToCart,
 }: HomeProps) {
 
+  const { customer } = useShopAuth();
+
   const [products, setProducts] =
     useState<Product[]>([]);
 
@@ -37,7 +48,18 @@ export default function Home({
   const [recommended, setRecommended] =
     useState<Product[]>([]);
 
+  const [recentlyViewed, setRecentlyViewed] =
+    useState<Product[]>([]);
+
+  const [becauseYouViewed, setBecauseYouViewed] =
+    useState<{ product: Product; recs: Product[] } | null>(null);
+
+  const [trending, setTrending] =
+    useState<{ categoryName: string; products: Product[] } | null>(null);
+
   useEffect(() => {
+    track("homepage_viewed");
+
     getProducts()
       .then(setProducts)
       .catch(console.error);
@@ -50,6 +72,68 @@ export default function Home({
       .then(setRecommended)
       .catch(console.error);
   }, []);
+
+  useEffect(() => {
+    if (!customer) {
+      return;
+    }
+
+    getRecentlyViewed()
+      .then(async (viewed) => {
+        setRecentlyViewed(viewed);
+
+        if (viewed.length === 0) return;
+
+        const topProduct = viewed[0];
+
+        getProductRecommendations(topProduct.id)
+          .then((recs) =>
+            setBecauseYouViewed(
+              recs.length > 0 ? { product: topProduct, recs } : null
+            )
+          )
+          .catch(console.error);
+
+        const categoryCounts = new Map<number, number>();
+
+        for (const p of viewed) {
+          categoryCounts.set(
+            p.categoryId,
+            (categoryCounts.get(p.categoryId) ?? 0) + 1
+          );
+        }
+
+        const [topCategoryId] = [...categoryCounts.entries()].sort(
+          (a, b) => b[1] - a[1]
+        )[0];
+
+        const topCategory = viewed.find(
+          (p) => p.categoryId === topCategoryId
+        )?.category;
+
+        const viewedIds = new Set(viewed.map((p) => p.id));
+
+        const popular = await getPopularProducts(30);
+
+        const trendingProducts = popular
+          .filter(
+            (p) => p.categoryId === topCategoryId && !viewedIds.has(p.id)
+          )
+          .slice(0, 4);
+
+        if (trendingProducts.length > 0 && topCategory) {
+          setTrending({
+            categoryName: topCategory.name,
+            products: trendingProducts,
+          });
+        } else {
+          setTrending(null);
+        }
+      })
+      .catch(() => {
+        // No view history yet — the personalized sections simply don't render.
+      });
+  }, [customer]);
 
   const productsByCategory = useMemo(() => {
     const map = new Map<number, Product[]>();
@@ -223,6 +307,43 @@ export default function Home({
           onAddToCart={onAddToCart}
         />
       </section>
+
+      {/* Recently viewed — customer-gated so stale data from a previous
+          session (e.g. after logout) never renders. */}
+
+      {customer && recentlyViewed.length > 0 && (
+        <section className="max-w-7xl mx-auto px-6 pb-4">
+          <RecommendedProducts
+            title="Recently Viewed"
+            products={recentlyViewed}
+            onAddToCart={onAddToCart}
+          />
+        </section>
+      )}
+
+      {/* Because you viewed X */}
+
+      {customer && becauseYouViewed && (
+        <section className="max-w-7xl mx-auto px-6 pb-4">
+          <RecommendedProducts
+            title={`Because You Viewed ${becauseYouViewed.product.name}`}
+            products={becauseYouViewed.recs}
+            onAddToCart={onAddToCart}
+          />
+        </section>
+      )}
+
+      {/* Trending in your category */}
+
+      {customer && trending && (
+        <section className="max-w-7xl mx-auto px-6 pb-4">
+          <RecommendedProducts
+            title={`Trending in ${trending.categoryName}`}
+            products={trending.products}
+            onAddToCart={onAddToCart}
+          />
+        </section>
+      )}
 
       {/* Product rows by category */}
 

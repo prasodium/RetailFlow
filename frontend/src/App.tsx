@@ -16,6 +16,7 @@ import SalesHistory from "./pages/SalesHistory";
 import InvoiceDetails from "./pages/InvoiceDetails";
 import OnlineOrders from "./pages/OnlineOrders";
 import Customers from "./pages/Customers";
+import Analytics from "./pages/Analytics";
 import Reports from "./pages/Reports";
 import Categories from "./pages/Categories";
 import Settings from "./pages/Settings";
@@ -77,6 +78,12 @@ export default function App() {
               <Route
                 path="/categories"
                 element={<Categories />}
+              />
+
+              {/* Analytics */}
+              <Route
+                path="/analytics"
+                element={<Analytics />}
               />
 
               {/* Reports */}

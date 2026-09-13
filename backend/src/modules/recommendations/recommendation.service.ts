@@ -159,7 +159,7 @@ function rankedProductsFrom(
     .filter((p): p is ProductWithCategory => Boolean(p));
 }
 
-async function getBestSellingProducts(limit: number) {
+export async function getBestSellingProducts(limit: number) {
   const top = await getTopProducts();
   const ids = top.slice(0, limit).map((t) => t.productId);
 

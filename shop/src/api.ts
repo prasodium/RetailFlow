@@ -117,3 +117,11 @@ export function getCartRecommendations(productIds: number[]) {
     body: JSON.stringify({ productIds }),
   });
 }
+
+export function getRecentlyViewed() {
+  return request<Product[]>("/customers/me/recently-viewed");
+}
+
+export function getPopularProducts(limit = 30) {
+  return request<Product[]>(`/products/popular?limit=${limit}`);
+}

@@ -6,6 +6,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { ShopAuthProvider } from "./context/ShopAuthContext";
+import { track } from "./lib/analytics";
 import RequireCustomerAuth from "./components/RequireCustomerAuth";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -53,6 +54,11 @@ function AppShell() {
     product: Product,
     quantity = 1
   ) {
+
+    track("product_added_to_cart", {
+      productId: product.id,
+      metadata: { quantity },
+    });
 
     setCart((current) => {
 
@@ -115,6 +121,8 @@ function AppShell() {
   function removeFromCart(
     productId: number
   ) {
+
+    track("product_removed_from_cart", { productId });
 
     setCart((current) =>
       current.filter(

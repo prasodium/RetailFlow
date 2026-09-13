@@ -161,3 +161,30 @@ export async function getCustomerSales(
     },
   });
 }
+
+export async function getRecentlyViewedProducts(
+  customerId: number,
+  limit = 10
+) {
+  const views = await prisma.productView.findMany({
+    where: {
+      customerId,
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+    take: limit,
+    include: {
+      product: {
+        include: {
+          category: true,
+          inventory: true,
+        },
+      },
+    },
+  });
+
+  return views
+    .filter((view) => view.product.isActive)
+    .map((view) => view.product);
+}

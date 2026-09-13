@@ -17,6 +17,7 @@ import StarRating from "../components/StarRating";
 import { resolveImageUrl } from "../lib/assets";
 import { getProductRating } from "../lib/rating";
 import { getDiscountPercent, getListPrice } from "../lib/pricing";
+import { track } from "../lib/analytics";
 import type { Product } from "../types";
 
 interface ProductDetailsProps {
@@ -53,6 +54,7 @@ export default function ProductDetails({
       .then((data) => {
         setProduct(data);
         setQuantity(1);
+        track("product_viewed", { productId: data.id });
       })
       .catch(console.error)
       .finally(() => setLoading(false));

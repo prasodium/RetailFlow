@@ -6,8 +6,15 @@ import {
   ShoppingCart,
   IndianRupee,
   AlertTriangle,
+  SearchX,
+  XCircle,
+  CheckCircle2,
 } from "lucide-react";
 import api from "../services/api";
+import {
+  getActionRequired,
+  type ActionRequired,
+} from "../services/analyticsService";
 
 interface InventoryStats {
   totalProducts: number;
@@ -46,6 +53,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [sales, setSales] = useState<Sale[]>([]);
   const [lowStock, setLowStock] = useState<LowStockProduct[]>([]);
+  const [actionRequired, setActionRequired] = useState<ActionRequired | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -58,10 +66,12 @@ export default function Dashboard() {
         statsResponse,
         salesResponse,
         lowStockResponse,
+        actionRequiredData,
       ] = await Promise.all([
         api.get("/inventory/stats"),
         api.get("/sales"),
         api.get("/inventory/low-stock"),
+        getActionRequired(30),
       ]);
 
       if (statsResponse.data.success) {
@@ -75,6 +85,8 @@ export default function Dashboard() {
       if (lowStockResponse.data.success) {
         setLowStock(lowStockResponse.data.data);
       }
+
+      setActionRequired(actionRequiredData);
     } catch (error) {
       console.error(
         "Failed to load dashboard",
@@ -145,6 +157,95 @@ export default function Dashboard() {
           Overview of your retail business
         </p>
       </div>
+
+      {/* Action Required */}
+
+      {actionRequired && (
+        <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+          <div className="px-6 py-4 border-b flex items-center gap-2">
+            <AlertTriangle size={18} className="text-red-600" />
+            <h3 className="font-semibold">Action Required</h3>
+          </div>
+
+          {actionRequired.outOfStock.length === 0 &&
+          actionRequired.lowStock.length === 0 &&
+          actionRequired.zeroResultQueries.length === 0 &&
+          actionRequired.highCancellation.length === 0 ? (
+            <div className="px-6 py-8 text-center text-zinc-400 flex flex-col items-center gap-2">
+              <CheckCircle2 size={24} className="text-green-500" />
+              Nothing needs attention right now.
+            </div>
+          ) : (
+            <div className="divide-y">
+
+              {actionRequired.outOfStock.map((item) => (
+                <div
+                  key={`oos-${item.id}`}
+                  onClick={() => navigate(`/inventory?productId=${item.product.id}`)}
+                  className="flex items-center justify-between px-6 py-3 hover:bg-zinc-50 cursor-pointer"
+                >
+                  <span className="flex items-center gap-2 text-sm">
+                    <XCircle size={15} className="text-red-600 shrink-0" />
+                    Out of stock:{" "}
+                    <span className="font-medium">{item.product.name}</span>
+                  </span>
+                  <span className="text-xs text-red-600 font-medium">0 remaining</span>
+                </div>
+              ))}
+
+              {actionRequired.lowStock.map((item) => (
+                <div
+                  key={`low-${item.id}`}
+                  onClick={() => navigate(`/inventory?productId=${item.product.id}`)}
+                  className="flex items-center justify-between px-6 py-3 hover:bg-zinc-50 cursor-pointer"
+                >
+                  <span className="flex items-center gap-2 text-sm">
+                    <Warehouse size={15} className="text-orange-500 shrink-0" />
+                    Low inventory:{" "}
+                    <span className="font-medium">{item.product.name}</span>
+                  </span>
+                  <span className="text-xs text-orange-600 font-medium">
+                    {item.quantity} remaining
+                  </span>
+                </div>
+              ))}
+
+              {actionRequired.highCancellation.map((item) => (
+                <div
+                  key={`cancel-${item.productId}`}
+                  className="flex items-center justify-between px-6 py-3"
+                >
+                  <span className="flex items-center gap-2 text-sm">
+                    <AlertTriangle size={15} className="text-red-600 shrink-0" />
+                    Frequently cancelled:{" "}
+                    <span className="font-medium">{item.name}</span>
+                  </span>
+                  <span className="text-xs text-red-600 font-medium">
+                    {item.cancelledCount} cancelled (30d)
+                  </span>
+                </div>
+              ))}
+
+              {actionRequired.zeroResultQueries.map((q) => (
+                <div
+                  key={`search-${q.query}`}
+                  onClick={() => navigate("/analytics")}
+                  className="flex items-center justify-between px-6 py-3 hover:bg-zinc-50 cursor-pointer"
+                >
+                  <span className="flex items-center gap-2 text-sm">
+                    <SearchX size={15} className="text-zinc-500 shrink-0" />
+                    Search issue: <span className="font-medium">"{q.query}"</span>
+                  </span>
+                  <span className="text-xs text-zinc-500 font-medium">
+                    {q.count} searches, no results
+                  </span>
+                </div>
+              ))}
+
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Statistics */}
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -7,6 +7,7 @@ import {
 
 import { placeOrder } from "../api";
 import { useShopAuth } from "../context/ShopAuthContext";
+import { track } from "../lib/analytics";
 import type { CartItem } from "../types";
 
 interface CheckoutProps {
@@ -33,6 +34,16 @@ export default function Checkout({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (cart.length > 0) {
+      track("checkout_started", {
+        metadata: { itemCount: cart.length },
+      });
+    }
+    // Only fire once when the checkout page is first reached with items.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const subtotal = cart.reduce(
     (sum, item) =>
@@ -101,6 +112,14 @@ export default function Checkout({
         "retailflow-last-order",
         JSON.stringify(order)
       );
+
+      track("purchase_completed", {
+        metadata: {
+          orderId: order.id,
+          total: subtotal,
+          itemCount: cart.length,
+        },
+      });
 
       onClearCart();
 

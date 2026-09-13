@@ -6,8 +6,30 @@ import {
   getCustomerById,
   getCustomerSales,
   getCustomers,
+  getRecentlyViewedProducts,
   updateCustomer,
 } from "./customer.service.js";
+
+export async function recentlyViewedController(
+  req: Request,
+  res: Response
+) {
+  try {
+    const products = await getRecentlyViewedProducts(req.customer!.id);
+
+    res.json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch recently viewed products",
+    });
+  }
+}
 
 export async function createCustomerController(
   req: Request,

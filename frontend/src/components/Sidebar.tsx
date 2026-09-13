@@ -6,6 +6,7 @@ import {
   Truck,
   Users,
   Tags,
+  LineChart,
   BarChart3,
   Settings,
 } from "lucide-react";
@@ -47,6 +48,11 @@ const menuItems = [
     name: "Categories",
     path: "/categories",
     icon: Tags,
+  },
+  {
+    name: "Analytics",
+    path: "/analytics",
+    icon: LineChart,
   },
   {
     name: "Reports",
