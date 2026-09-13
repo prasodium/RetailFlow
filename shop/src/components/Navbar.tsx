@@ -1,10 +1,15 @@
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ShoppingCart,
   Search,
   User,
+  MapPin,
+  Menu,
 } from "lucide-react";
 import { useShopAuth } from "../context/ShopAuthContext";
+import { getCategories } from "../api";
+import type { Category } from "../types";
 
 interface NavbarProps {
   cartCount: number;
@@ -14,77 +19,124 @@ export default function Navbar({
   cartCount,
 }: NavbarProps) {
   const { customer } = useShopAuth();
+  const navigate = useNavigate();
+
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    getCategories().then(setCategories).catch(console.error);
+  }, []);
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+
+    navigate(
+      search.trim()
+        ? `/products?q=${encodeURIComponent(search.trim())}`
+        : "/products"
+    );
+  }
 
   return (
-    <header className="border-b bg-white sticky top-0 z-50">
+    <header className="sticky top-0 z-50">
 
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      {/* Top bar */}
 
-        <Link
-          to="/"
-          className="text-xl font-bold tracking-tight"
-        >
-          Retail<span className="text-blue-600">
-            Flow
-          </span>
-          <span className="text-zinc-400 text-sm font-normal ml-2">
-            Store
-          </span>
-        </Link>
-
-        <nav className="hidden md:flex items-center gap-8 text-sm">
+      <div className="bg-[#131921] text-white">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center gap-4">
 
           <Link
             to="/"
-            className="text-zinc-600 hover:text-blue-600"
+            className="text-xl font-bold tracking-tight shrink-0 border border-transparent hover:border-white rounded px-2 py-1"
           >
-            Home
+            Retail<span className="text-[#ff9900]">Flow</span>
           </Link>
+
+          <div className="hidden lg:flex items-center gap-1 text-xs shrink-0 border border-transparent hover:border-white rounded px-2 py-1 cursor-pointer">
+            <MapPin size={18} className="text-zinc-300" />
+            <div>
+              <p className="text-zinc-300 leading-tight">Deliver to</p>
+              <p className="font-semibold leading-tight">India</p>
+            </div>
+          </div>
+
+          <form
+            onSubmit={handleSearch}
+            className="flex-1 flex items-stretch rounded-md overflow-hidden max-w-2xl"
+          >
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search RetailFlow Store"
+              className="flex-1 min-w-0 px-4 text-sm text-zinc-900 outline-none"
+            />
+
+            <button
+              type="submit"
+              className="bg-[#febd69] hover:bg-[#f3a847] px-4 flex items-center justify-center"
+            >
+              <Search size={18} className="text-zinc-900" />
+            </button>
+          </form>
 
           <Link
-            to="/products"
-            className="text-zinc-600 hover:text-blue-600"
+            to={customer ? "/account" : "/login"}
+            className="hidden sm:flex flex-col text-xs shrink-0 border border-transparent hover:border-white rounded px-2 py-1"
           >
-            Products
-          </Link>
-
-        </nav>
-
-        <div className="flex items-center gap-4">
-
-          <button className="hidden sm:flex items-center gap-2 border rounded-lg px-3 py-2 text-zinc-400">
-            <Search size={17} />
-            <span className="text-sm">
-              Search
+            <span className="text-zinc-300">
+              {customer ? `Hello, ${customer.name.split(" ")[0]}` : "Hello, sign in"}
             </span>
-          </button>
-
-          <Link
-            to="/cart"
-            className="relative p-2 hover:bg-zinc-100 rounded-lg"
-          >
-            <ShoppingCart size={21} />
-
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center">
-                {cartCount}
-              </span>
-            )}
+            <span className="font-semibold">Account &amp; Lists</span>
           </Link>
 
           <Link
             to={customer ? "/account" : "/login"}
-            className="flex items-center gap-2 p-2 hover:bg-zinc-100 rounded-lg"
+            className="sm:hidden p-2 border border-transparent hover:border-white rounded"
           >
-            <User size={21} />
+            <User size={22} />
+          </Link>
 
-            <span className="hidden sm:inline text-sm text-zinc-600">
-              {customer ? customer.name.split(" ")[0] : "Sign In"}
+          <Link
+            to="/cart"
+            className="relative flex items-end gap-1 shrink-0 border border-transparent hover:border-white rounded px-2 py-1"
+          >
+            <ShoppingCart size={28} />
+            <span className="absolute -top-1 left-4 w-5 h-5 rounded-full bg-[#ff9900] text-zinc-900 text-xs font-bold flex items-center justify-center">
+              {cartCount}
+            </span>
+            <span className="hidden md:inline text-sm font-semibold pb-0.5">
+              Cart
             </span>
           </Link>
 
         </div>
+      </div>
 
+      {/* Category strip */}
+
+      <div className="bg-[#232f3e] text-white text-sm">
+        <div className="max-w-7xl mx-auto px-4 h-10 flex items-center gap-5 overflow-x-auto">
+
+          <Link
+            to="/products"
+            className="flex items-center gap-1.5 font-semibold shrink-0 hover:text-zinc-300"
+          >
+            <Menu size={16} />
+            All
+          </Link>
+
+          {categories.map((category) => (
+            <Link
+              key={category.id}
+              to={`/products?category=${category.id}`}
+              className="shrink-0 hover:text-zinc-300 whitespace-nowrap"
+            >
+              {category.name}
+            </Link>
+          ))}
+
+        </div>
       </div>
 
     </header>

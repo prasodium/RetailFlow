@@ -20,7 +20,7 @@ export default function RecommendedProducts({
   return (
     <section className="mt-12">
       <div className="flex items-center gap-2 mb-5">
-        <Sparkles size={18} className="text-blue-600" />
+        <Sparkles size={18} className="text-[#c7511f]" />
 
         <h2 className="text-xl font-bold">{title}</h2>
       </div>

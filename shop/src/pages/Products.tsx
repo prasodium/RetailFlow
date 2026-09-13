@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
 
 import { getCategories, getProducts } from "../api";
@@ -14,9 +15,13 @@ interface ProductsProps {
   ) => void;
 }
 
+type SortOption = "featured" | "price-asc" | "price-desc" | "name";
+
 export default function Products({
   onAddToCart,
 }: ProductsProps) {
+
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [products, setProducts] =
     useState<Product[]>([]);
@@ -24,14 +29,19 @@ export default function Products({
   const [categories, setCategories] =
     useState<Category[]>([]);
 
-  const [search, setSearch] =
-    useState("");
-
-  const [categoryId, setCategoryId] =
-    useState<number | null>(null);
+  const [sort, setSort] = useState<SortOption>("featured");
 
   const [loading, setLoading] =
     useState(true);
+
+  // The URL is the single source of truth for search/category, so
+  // navigating here from a category tile or the navbar search "just
+  // works" without a sync effect.
+  const search = searchParams.get("q") ?? "";
+
+  const categoryId = searchParams.get("category")
+    ? Number(searchParams.get("category"))
+    : null;
 
   useEffect(() => {
     Promise.all([
@@ -46,16 +56,41 @@ export default function Products({
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredProducts =
-    products.filter((product) => {
+  function updateSearch(value: string) {
+    const next = new URLSearchParams(searchParams);
 
+    if (value) {
+      next.set("q", value);
+    } else {
+      next.delete("q");
+    }
+
+    setSearchParams(next, { replace: true });
+  }
+
+  function selectCategory(id: number | null) {
+    const next = new URLSearchParams(searchParams);
+
+    if (id === null) {
+      next.delete("category");
+    } else {
+      next.set("category", String(id));
+    }
+
+    setSearchParams(next);
+  }
+
+  const filteredProducts = useMemo(() => {
+    const query = search.toLowerCase();
+
+    const filtered = products.filter((product) => {
       const matchesSearch =
         product.name
           .toLowerCase()
-          .includes(search.toLowerCase()) ||
+          .includes(query) ||
         product.sku
           .toLowerCase()
-          .includes(search.toLowerCase());
+          .includes(query);
 
       const matchesCategory =
         categoryId === null ||
@@ -67,106 +102,158 @@ export default function Products({
       );
     });
 
+    switch (sort) {
+      case "price-asc":
+        return [...filtered].sort(
+          (a, b) => Number(a.price) - Number(b.price)
+        );
+      case "price-desc":
+        return [...filtered].sort(
+          (a, b) => Number(b.price) - Number(a.price)
+        );
+      case "name":
+        return [...filtered].sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+      default:
+        return filtered;
+    }
+  }, [products, search, categoryId, sort]);
+
+  const activeCategory = categories.find((c) => c.id === categoryId);
+
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
+    <div className="max-w-7xl mx-auto px-6 py-8">
 
-      <div className="mb-10">
+      <div className="mb-6">
 
-        <p className="text-blue-600 text-sm font-medium">
-          SHOP
-        </p>
-
-        <h1 className="text-4xl font-bold mt-1">
-          All Products
+        <h1 className="text-2xl font-bold">
+          {activeCategory ? activeCategory.name : "All Products"}
         </h1>
 
-        <p className="text-zinc-500 mt-2">
-          Browse our available products.
+        <p className="text-zinc-500 mt-1 text-sm">
+          {filteredProducts.length} results
         </p>
 
       </div>
 
-      {/* Filters */}
+      <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8">
 
-      <div className="flex flex-col md:flex-row gap-4 mb-8">
+        {/* Sidebar */}
 
-        <div className="relative flex-1">
+        <aside className="space-y-6">
 
-          <Search
-            size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
-          />
+          <div>
+            <h2 className="font-semibold text-sm mb-3">
+              Category
+            </h2>
 
-          <input
-            value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
-            placeholder="Search products..."
-            className="w-full border border-zinc-300 rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-          />
+            <div className="space-y-2 text-sm">
 
-        </div>
-
-        <select
-          value={categoryId ?? ""}
-          onChange={(e) =>
-            setCategoryId(
-              e.target.value
-                ? Number(e.target.value)
-                : null
-            )
-          }
-          className="border border-zinc-300 rounded-xl px-4 py-3 bg-white"
-        >
-          <option value="">
-            All Categories
-          </option>
-
-          {categories.map(
-            (category) => (
-              <option
-                key={category.id}
-                value={category.id}
+              <button
+                onClick={() => selectCategory(null)}
+                className={`block text-left ${
+                  categoryId === null
+                    ? "font-semibold text-[#c7511f]"
+                    : "text-zinc-600 hover:text-[#c7511f]"
+                }`}
               >
-                {category.name}
-              </option>
-            )
+                All Categories
+              </button>
+
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => selectCategory(category.id)}
+                  className={`block text-left ${
+                    categoryId === category.id
+                      ? "font-semibold text-[#c7511f]"
+                      : "text-zinc-600 hover:text-[#c7511f]"
+                  }`}
+                >
+                  {category.name}
+                </button>
+              ))}
+
+            </div>
+          </div>
+
+        </aside>
+
+        {/* Results */}
+
+        <div>
+
+          {/* Filters */}
+
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+
+            <div className="relative flex-1">
+
+              <Search
+                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+              />
+
+              <input
+                value={search}
+                onChange={(e) =>
+                  updateSearch(e.target.value)
+                }
+                placeholder="Search products..."
+                className="w-full border border-zinc-300 rounded-md pl-10 pr-4 py-2.5 outline-none focus:ring-2 focus:ring-[#febd69]"
+              />
+
+            </div>
+
+            <select
+              value={sort}
+              onChange={(e) =>
+                setSort(e.target.value as SortOption)
+              }
+              className="border border-zinc-300 rounded-md px-4 py-2.5 bg-white text-sm"
+            >
+              <option value="featured">Sort: Featured</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="name">Name: A to Z</option>
+            </select>
+
+          </div>
+
+          {loading ? (
+
+            <div className="py-20 text-center text-zinc-500">
+              Loading products...
+            </div>
+
+          ) : filteredProducts.length === 0 ? (
+
+            <div className="py-20 text-center text-zinc-500">
+              No products found.
+            </div>
+
+          ) : (
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+
+              {filteredProducts.map(
+                (product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onAddToCart={onAddToCart}
+                  />
+                )
+              )}
+
+            </div>
+
           )}
 
-        </select>
+        </div>
 
       </div>
-
-      {loading ? (
-
-        <div className="py-20 text-center text-zinc-500">
-          Loading products...
-        </div>
-
-      ) : filteredProducts.length === 0 ? (
-
-        <div className="py-20 text-center text-zinc-500">
-          No products found.
-        </div>
-
-      ) : (
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-
-          {filteredProducts.map(
-            (product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onAddToCart={onAddToCart}
-              />
-            )
-          )}
-
-        </div>
-
-      )}
 
     </div>
   );

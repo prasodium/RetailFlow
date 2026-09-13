@@ -51,7 +51,7 @@ export default function OrderDetail() {
     <div className="max-w-3xl mx-auto px-6 py-12">
       <Link
         to="/account"
-        className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-blue-600 mb-8"
+        className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-[#c7511f] mb-8"
       >
         <ArrowLeft size={16} />
         Back to orders
@@ -89,7 +89,7 @@ export default function OrderDetail() {
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
                         reached
-                          ? "bg-blue-600 text-white"
+                          ? "bg-[#ffa41c] text-white"
                           : "bg-zinc-100 text-zinc-400"
                       }`}
                     >
@@ -98,7 +98,7 @@ export default function OrderDetail() {
 
                     <p
                       className={`text-xs mt-2 text-center ${
-                        reached ? "text-blue-600 font-medium" : "text-zinc-400"
+                        reached ? "text-[#c7511f] font-medium" : "text-zinc-400"
                       }`}
                     >
                       {step}
@@ -109,7 +109,7 @@ export default function OrderDetail() {
                     <div
                       className={`h-0.5 flex-1 -mt-5 ${
                         index < currentStepIndex
-                          ? "bg-blue-600"
+                          ? "bg-[#ffa41c]"
                           : "bg-zinc-200"
                       }`}
                     />

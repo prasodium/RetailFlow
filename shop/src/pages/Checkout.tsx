@@ -135,7 +135,7 @@ export default function Checkout({
 
         <Link
           to="/products"
-          className="inline-block mt-6 px-5 py-3 bg-blue-600 text-white rounded-xl"
+          className="inline-block mt-6 px-5 py-3 bg-[#ffa41c] text-zinc-900 rounded-xl"
         >
           Browse Products
         </Link>
@@ -149,7 +149,7 @@ export default function Checkout({
 
       <Link
         to="/cart"
-        className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-blue-600 mb-8"
+        className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-[#c7511f] mb-8"
       >
         <ArrowLeft size={16} />
         Back to cart
@@ -192,7 +192,7 @@ export default function Checkout({
                     setName(e.target.value)
                   }
                   placeholder="Your name"
-                  className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#febd69]"
                 />
 
               </div>
@@ -209,7 +209,7 @@ export default function Checkout({
                     setPhone(e.target.value)
                   }
                   placeholder="Phone number"
-                  className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#febd69]"
                 />
 
               </div>
@@ -227,7 +227,7 @@ export default function Checkout({
                     setEmail(e.target.value)
                   }
                   placeholder="you@example.com"
-                  className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#febd69]"
                 />
 
               </div>
@@ -245,7 +245,7 @@ export default function Checkout({
                   }
                   placeholder="Enter your complete address"
                   rows={4}
-                  className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#febd69] resize-none"
                 />
 
               </div>
@@ -260,7 +260,7 @@ export default function Checkout({
 
             <div className="flex items-center gap-3">
 
-              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+              <div className="p-2 bg-orange-50 text-[#c7511f] rounded-lg">
                 <CreditCard size={20} />
               </div>
 
@@ -298,7 +298,7 @@ export default function Checkout({
                   }
                   className={`border rounded-xl p-4 text-sm font-medium transition ${
                     paymentMethod === value
-                      ? "border-blue-600 bg-blue-50 text-blue-700"
+                      ? "border-[#ffa41c] bg-orange-50 text-[#c7511f]"
                       : "border-zinc-200 hover:border-zinc-400"
                   }`}
                 >
@@ -320,7 +320,7 @@ export default function Checkout({
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#ffa41c] text-zinc-900 py-4 rounded-xl font-semibold hover:bg-[#fa8900] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading
               ? "Processing Order..."

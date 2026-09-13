@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { ShopAuthProvider } from "./context/ShopAuthContext";
 import RequireCustomerAuth from "./components/RequireCustomerAuth";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
@@ -139,7 +140,7 @@ function AppShell() {
 
       <Navbar cartCount={cartCount} />
 
-      <main className="min-h-[calc(100vh-64px)] bg-zinc-50">
+      <main className="min-h-[calc(100vh-104px)] bg-[#eaeded]">
 
         <Routes>
 
@@ -215,6 +216,8 @@ function AppShell() {
         </Routes>
 
       </main>
+
+      <Footer />
 
     </BrowserRouter>
   );

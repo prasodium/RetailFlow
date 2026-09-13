@@ -55,7 +55,7 @@ export default function Login() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#febd69]"
             placeholder="you@example.com"
           />
         </div>
@@ -68,7 +68,7 @@ export default function Login() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#febd69]"
             placeholder="••••••••"
           />
         </div>
@@ -82,7 +82,7 @@ export default function Login() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 disabled:opacity-50"
+          className="w-full bg-[#ffa41c] text-zinc-900 py-3 rounded-xl font-semibold hover:bg-[#fa8900] disabled:opacity-50"
         >
           {loading ? "Signing in..." : "Sign In"}
         </button>
@@ -90,7 +90,7 @@ export default function Login() {
 
       <p className="text-center text-sm text-zinc-500 mt-6">
         New here?{" "}
-        <Link to="/signup" className="text-blue-600 font-medium">
+        <Link to="/signup" className="text-[#007185] font-medium">
           Create an account
         </Link>
       </p>

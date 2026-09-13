@@ -5,6 +5,9 @@ import {
 import { Link } from "react-router-dom";
 import type { Product } from "../types";
 import { resolveImageUrl } from "../lib/assets";
+import { getProductRating } from "../lib/rating";
+import { getDiscountPercent, getListPrice } from "../lib/pricing";
+import StarRating from "./StarRating";
 
 interface ProductCardProps {
   product: Product;
@@ -24,8 +27,13 @@ export default function ProductCard({
   const outOfStock = stock <= 0;
   const imageUrl = resolveImageUrl(product.imageUrl);
 
+  const price = Number(product.price);
+  const listPrice = getListPrice(price);
+  const discount = getDiscountPercent(price, listPrice);
+  const { rating, reviewCount } = getProductRating(product.id);
+
   return (
-    <div className="group bg-white border border-zinc-200 rounded-2xl overflow-hidden hover:shadow-lg transition">
+    <div className="group bg-white border border-zinc-200 rounded-lg overflow-hidden hover:shadow-lg transition flex flex-col">
 
       {/* Product visual */}
 
@@ -34,13 +42,13 @@ export default function ProductCard({
         className="block"
       >
 
-        <div className="h-52 bg-gradient-to-br from-zinc-100 to-zinc-200 flex items-center justify-center overflow-hidden">
+        <div className="h-52 bg-white flex items-center justify-center overflow-hidden p-4">
 
           {imageUrl ? (
             <img
               src={imageUrl}
               alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition"
+              className="max-h-full max-w-full object-contain group-hover:scale-105 transition"
             />
           ) : (
             <Package
@@ -54,55 +62,68 @@ export default function ProductCard({
 
       </Link>
 
-      <div className="p-5">
+      <div className="p-4 flex-1 flex flex-col">
 
-        <p className="text-xs text-blue-600 font-medium uppercase tracking-wide">
+        <p className="text-[11px] text-[#007185] font-medium uppercase tracking-wide">
           {product.category.name}
         </p>
 
         <Link
           to={`/products/${product.id}`}
         >
-          <h3 className="font-semibold text-lg mt-1 hover:text-blue-600">
+          <h3 className="font-medium text-sm mt-1 hover:text-[#c7511f] line-clamp-2 min-h-[2.5rem]">
             {product.name}
           </h3>
         </Link>
 
-        <p className="text-sm text-zinc-500 mt-1">
-          {product.sku}
-        </p>
+        <div className="mt-1.5">
+          <StarRating rating={rating} reviewCount={reviewCount} />
+        </div>
 
-        <div className="flex items-center justify-between mt-5">
+        <div className="mt-2">
 
-          <div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-xs align-top">₹</span>
+            <span className="text-xl font-semibold">
+              {price.toLocaleString("en-IN")}
+            </span>
 
-            <p className="text-xl font-bold">
-              ₹{Number(product.price).toFixed(2)}
-            </p>
-
-            {outOfStock ? (
-              <p className="text-xs text-red-600 mt-1">
-                Out of stock
-              </p>
-            ) : (
-              <p className="text-xs text-zinc-500 mt-1">
-                {stock} available
-              </p>
+            {discount > 0 && (
+              <span className="text-xs text-green-700 font-medium">
+                -{discount}%
+              </span>
             )}
-
           </div>
 
-          <button
-            disabled={outOfStock}
-            onClick={() =>
-              onAddToCart(product)
-            }
-            className="p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-zinc-300 disabled:cursor-not-allowed transition"
-          >
-            <ShoppingCart size={19} />
-          </button>
+          {discount > 0 && (
+            <p className="text-xs text-zinc-500">
+              M.R.P.:{" "}
+              <span className="line-through">
+                ₹{listPrice.toLocaleString("en-IN")}
+              </span>
+            </p>
+          )}
+
+          <p className="text-xs text-zinc-500 mt-0.5">
+            {outOfStock ? (
+              <span className="text-red-600 font-medium">Out of stock</span>
+            ) : (
+              "FREE Delivery"
+            )}
+          </p>
 
         </div>
+
+        <button
+          disabled={outOfStock}
+          onClick={() =>
+            onAddToCart(product)
+          }
+          className="mt-3 w-full flex items-center justify-center gap-2 bg-[#ffd814] hover:bg-[#f7ca00] text-zinc-900 text-sm font-medium py-2 rounded-full disabled:bg-zinc-200 disabled:text-zinc-400 disabled:cursor-not-allowed transition"
+        >
+          <ShoppingCart size={16} />
+          Add to Cart
+        </button>
 
       </div>
 

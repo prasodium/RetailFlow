@@ -61,7 +61,7 @@ export default function Cart({
 
         <Link
           to="/products"
-          className="inline-block mt-6 px-5 py-3 bg-blue-600 text-white rounded-xl"
+          className="inline-block mt-6 px-5 py-3 bg-[#ffa41c] text-zinc-900 rounded-xl"
         >
           Browse Products
         </Link>
@@ -220,7 +220,7 @@ export default function Cart({
 
           <Link
             to="/checkout"
-            className="block text-center mt-6 bg-blue-600 text-white rounded-xl py-3 font-medium hover:bg-blue-700"
+            className="block text-center mt-6 bg-[#ffa41c] text-zinc-900 rounded-xl py-3 font-medium hover:bg-[#fa8900]"
           >
             Proceed to Checkout
           </Link>

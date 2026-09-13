@@ -61,7 +61,7 @@ export default function Account() {
         </div>
       ) : orders.length === 0 ? (
         <div className="py-16 text-center">
-          <div className="mx-auto w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+          <div className="mx-auto w-12 h-12 rounded-full bg-orange-50 text-[#c7511f] flex items-center justify-center">
             <Package size={22} />
           </div>
 
@@ -69,7 +69,7 @@ export default function Account() {
 
           <Link
             to="/products"
-            className="inline-block mt-5 px-5 py-2.5 bg-blue-600 text-white rounded-xl"
+            className="inline-block mt-5 px-5 py-2.5 bg-[#ffa41c] text-zinc-900 rounded-xl"
           >
             Start Shopping
           </Link>

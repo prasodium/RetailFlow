@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   Package,
@@ -7,10 +7,11 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { getHomeRecommendations, getProducts } from "../api";
+import { getCategories, getHomeRecommendations, getProducts } from "../api";
 import ProductCard from "../components/ProductCard";
 import RecommendedProducts from "../components/RecommendedProducts";
 import type {
+  Category,
   Product,
 } from "../types";
 
@@ -28,6 +29,9 @@ export default function Home({
   const [products, setProducts] =
     useState<Product[]>([]);
 
+  const [categories, setCategories] =
+    useState<Category[]>([]);
+
   const [recommended, setRecommended] =
     useState<Product[]>([]);
 
@@ -36,10 +40,26 @@ export default function Home({
       .then(setProducts)
       .catch(console.error);
 
+    getCategories()
+      .then(setCategories)
+      .catch(console.error);
+
     getHomeRecommendations()
       .then(setRecommended)
       .catch(console.error);
   }, []);
+
+  const productsByCategory = useMemo(() => {
+    const map = new Map<number, Product[]>();
+
+    for (const product of products) {
+      const list = map.get(product.categoryId) ?? [];
+      list.push(product);
+      map.set(product.categoryId, list);
+    }
+
+    return map;
+  }, [products]);
 
   return (
     <div>
@@ -48,32 +68,32 @@ export default function Home({
 
       <section className="bg-zinc-950 text-white">
 
-        <div className="max-w-7xl mx-auto px-6 py-24">
+        <div className="max-w-7xl mx-auto px-6 py-20">
 
           <div className="max-w-3xl">
 
-            <p className="text-blue-400 font-medium mb-4">
+            <p className="text-[#ff9900] font-medium mb-4">
               RETAILFLOW STORE
             </p>
 
             <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-              Build better.
+              Everything you need.
               <br />
-              <span className="text-blue-500">
-                Create smarter.
+              <span className="text-[#febd69]">
+                Delivered to you.
               </span>
             </h1>
 
             <p className="text-zinc-400 text-lg mt-6 max-w-xl">
-              Quality development boards, electronics
-              and components for your next project.
+              Electronics, fashion, home essentials, books, and more —
+              all in one place.
             </p>
 
             <Link
               to="/products"
-              className="inline-flex items-center gap-2 mt-8 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl font-medium"
+              className="inline-flex items-center gap-2 mt-8 bg-[#febd69] hover:bg-[#f3a847] text-zinc-900 px-6 py-3 rounded-md font-semibold"
             >
-              Shop Products
+              Shop All Products
               <ArrowRight size={18} />
             </Link>
 
@@ -85,21 +105,21 @@ export default function Home({
 
       {/* Benefits */}
 
-      <section className="border-b">
+      <section className="border-b bg-white">
 
         <div className="max-w-7xl mx-auto px-6 py-8 grid md:grid-cols-3 gap-8">
 
           <div className="flex gap-4">
 
-            <Package className="text-blue-600" />
+            <Package className="text-[#c7511f]" />
 
             <div>
               <h3 className="font-semibold">
-                Quality Products
+                Wide Selection
               </h3>
 
               <p className="text-sm text-zinc-500">
-                Reliable electronics for your projects.
+                Thousands of products across every category.
               </p>
             </div>
 
@@ -107,7 +127,7 @@ export default function Home({
 
           <div className="flex gap-4">
 
-            <Truck className="text-blue-600" />
+            <Truck className="text-[#c7511f]" />
 
             <div>
               <h3 className="font-semibold">
@@ -123,7 +143,7 @@ export default function Home({
 
           <div className="flex gap-4">
 
-            <ShieldCheck className="text-blue-600" />
+            <ShieldCheck className="text-[#c7511f]" />
 
             <div>
               <h3 className="font-semibold">
@@ -141,55 +161,96 @@ export default function Home({
 
       </section>
 
-      {/* Products */}
+      {/* Shop by category */}
 
-      <section className="max-w-7xl mx-auto px-6 py-16">
+      {categories.length > 0 && (
+        <section className="max-w-7xl mx-auto px-6 py-12">
 
-        <div className="flex items-end justify-between mb-8">
+          <h2 className="text-2xl font-bold mb-6">
+            Shop by Category
+          </h2>
 
-          <div>
-            <p className="text-blue-600 text-sm font-medium">
-              FEATURED
-            </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">
 
-            <h2 className="text-3xl font-bold mt-1">
-              Popular Products
-            </h2>
+            {categories.map((category) => (
+              <Link
+                key={category.id}
+                to={`/products?category=${category.id}`}
+                className="bg-white border border-zinc-200 rounded-lg p-5 hover:shadow-md transition text-center"
+              >
+                <p className="font-semibold text-sm">
+                  {category.name}
+                </p>
+
+                <p className="text-xs text-[#007185] mt-2">
+                  Shop now
+                </p>
+              </Link>
+            ))}
+
           </div>
 
-          <Link
-            to="/products"
-            className="text-sm font-medium text-blue-600 flex items-center gap-1"
-          >
-            View all
-            <ArrowRight size={16} />
-          </Link>
+        </section>
+      )}
 
-        </div>
+      {/* Recommended for you */}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
-          {products.slice(0, 6).map(
-            (product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onAddToCart={onAddToCart}
-              />
-            )
-          )}
-
-        </div>
-
-      </section>
-
-      <section className="max-w-7xl mx-auto px-6 pb-16">
+      <section className="max-w-7xl mx-auto px-6 pb-4">
         <RecommendedProducts
           title="Recommended for You"
           products={recommended}
           onAddToCart={onAddToCart}
         />
       </section>
+
+      {/* Product rows by category */}
+
+      {categories.map((category) => {
+        const items = productsByCategory.get(category.id) ?? [];
+
+        if (items.length === 0) {
+          return null;
+        }
+
+        return (
+          <section
+            key={category.id}
+            className="max-w-7xl mx-auto px-6 py-8"
+          >
+
+            <div className="flex items-end justify-between mb-5">
+
+              <h2 className="text-xl font-bold">
+                {category.name}
+              </h2>
+
+              <Link
+                to={`/products?category=${category.id}`}
+                className="text-sm font-medium text-[#007185] flex items-center gap-1"
+              >
+                See more
+                <ArrowRight size={14} />
+              </Link>
+
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+              {items.slice(0, 4).map(
+                (product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onAddToCart={onAddToCart}
+                  />
+                )
+              )}
+
+            </div>
+
+          </section>
+        );
+      })}
 
     </div>
   );

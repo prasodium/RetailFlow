@@ -60,7 +60,7 @@ export default function Signup() {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#febd69]"
             placeholder="Your name"
           />
         </div>
@@ -73,7 +73,7 @@ export default function Signup() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#febd69]"
             placeholder="you@example.com"
           />
         </div>
@@ -84,7 +84,7 @@ export default function Signup() {
           <input
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#febd69]"
             placeholder="Phone number"
           />
         </div>
@@ -97,7 +97,7 @@ export default function Signup() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-zinc-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#febd69]"
             placeholder="At least 6 characters"
           />
         </div>
@@ -111,7 +111,7 @@ export default function Signup() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 disabled:opacity-50"
+          className="w-full bg-[#ffa41c] text-zinc-900 py-3 rounded-xl font-semibold hover:bg-[#fa8900] disabled:opacity-50"
         >
           {loading ? "Creating account..." : "Create Account"}
         </button>
@@ -119,7 +119,7 @@ export default function Signup() {
 
       <p className="text-center text-sm text-zinc-500 mt-6">
         Already have an account?{" "}
-        <Link to="/login" className="text-blue-600 font-medium">
+        <Link to="/login" className="text-[#007185] font-medium">
           Sign in
         </Link>
       </p>

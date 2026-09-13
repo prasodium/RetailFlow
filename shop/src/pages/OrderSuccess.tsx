@@ -75,7 +75,7 @@ export default function OrderSuccess() {
 
         <Link
           to="/"
-          className="px-5 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700"
+          className="px-5 py-3 bg-[#ffa41c] text-zinc-900 rounded-xl hover:bg-[#fa8900]"
         >
           Back to Store
         </Link>
