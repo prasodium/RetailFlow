@@ -15,6 +15,8 @@ This is a monorepo with three apps sharing one PostgreSQL database:
 ## Features
 
 ### Customer Storefront (`shop`)
+- Amazon.in-style marketplace UI: two-tier navy header with a category strip, homepage category tiles and per-category product rows, a filterable/sortable listing page, and a buy-box style product page (star ratings, M.R.P. strike-through pricing, Add to Cart + Buy Now)
+- 32 seeded products across 9 categories (Electronics, Mobiles & Accessories, Fashion, Home & Kitchen, Beauty, Books, Sports & Fitness, Toys & Baby, Grocery) — see `backend/scripts/seed-catalog.ts`
 - Product browsing with search, category filters, and images
 - Customer accounts: signup/login (JWT), persistent order history
 - Cart and guest or logged-in checkout
@@ -74,6 +76,9 @@ npx prisma generate
 
 # Create your first admin login
 npx tsx scripts/create-staff-user.ts "Your Name" you@example.com yourpassword
+
+# Populate a multi-category product catalog (idempotent — safe to re-run)
+npx tsx scripts/seed-catalog.ts
 ```
 
 ### 4. Run everything
@@ -110,6 +115,7 @@ Every sale — in-store or online — is a `Sale` row distinguished by `source`:
 | `npm run build` | `frontend`, `shop` | Type-check + production build |
 | `npx prisma migrate deploy` | `backend` | Apply pending migrations |
 | `npx tsx scripts/create-staff-user.ts <name> <email> <password> [role]` | `backend` | Create or update an admin/staff login |
+| `npx tsx scripts/seed-catalog.ts` | `backend` | Seed/update the 9-category, 32-product demo catalog |
 
 ## Roadmap
 
