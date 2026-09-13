@@ -121,3 +121,7 @@ Every sale — in-store or online — is a `Sale` row distinguished by `source`:
 
 - Redis, Docker, CI
 - Returns, sales visits, offline-first PWA
+
+## License
+
+[MIT](LICENSE) © [prasodium](https://github.com/prasodium)
