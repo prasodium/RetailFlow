@@ -63,17 +63,18 @@ export default function Navbar({
 
           <form
             onSubmit={handleSearch}
-            className="flex-1 flex items-stretch rounded-md overflow-hidden max-w-2xl"
+            className="flex-1 flex items-stretch rounded-md overflow-hidden max-w-2xl ring-2 ring-transparent focus-within:ring-[#febd69]"
           >
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search RetailFlow Store"
-              className="flex-1 min-w-0 px-4 text-sm text-zinc-900 outline-none"
+              className="flex-1 min-w-0 px-4 py-2.5 bg-white text-sm text-zinc-900 placeholder:text-zinc-500 outline-none"
             />
 
             <button
               type="submit"
+              aria-label="Search"
               className="bg-[#febd69] hover:bg-[#f3a847] px-4 flex items-center justify-center"
             >
               <Search size={18} className="text-zinc-900" />

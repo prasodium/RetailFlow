@@ -3,6 +3,7 @@ import {
   ArrowRight,
   Package,
   ShieldCheck,
+  ShoppingBag,
   Truck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -67,9 +68,15 @@ export default function Home({
 
       {/* Hero */}
 
-      <section className="bg-zinc-950 text-white">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#0a0e17] via-[#131921] to-[#1e2d3f] text-white">
 
-        <div className="max-w-7xl mx-auto px-6 py-20">
+        {/* Decorative glow accents — no imagery available, so depth
+            comes from gradient + blurred color blobs instead of a
+            flat solid block. */}
+        <div className="pointer-events-none absolute -top-32 -right-20 w-96 h-96 rounded-full bg-[#febd69] opacity-20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 left-1/4 w-80 h-80 rounded-full bg-[#4a90d9] opacity-10 blur-3xl" />
+
+        <div className="relative max-w-7xl mx-auto px-6 py-14 md:py-16 grid lg:grid-cols-[1fr_auto] gap-10 items-center">
 
           <div className="max-w-3xl">
 
@@ -104,7 +111,16 @@ export default function Home({
 
           </div>
 
+          <ShoppingBag
+            size={220}
+            strokeWidth={0.6}
+            className="hidden lg:block text-white/10 justify-self-end"
+          />
+
         </div>
+
+        {/* Fade into the white section below instead of a hard edge */}
+        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-b from-transparent to-white" />
 
       </section>
 
