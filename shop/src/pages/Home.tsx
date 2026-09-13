@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { getCategories, getHomeRecommendations, getProducts } from "../api";
 import ProductCard from "../components/ProductCard";
 import RecommendedProducts from "../components/RecommendedProducts";
+import TextType from "../components/TextType";
 import type {
   Category,
   Product,
@@ -77,11 +78,15 @@ export default function Home({
             </p>
 
             <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-              Everything you need.
-              <br />
-              <span className="text-[#febd69]">
-                Delivered to you.
-              </span>
+              <TextType
+                as="span"
+                text={["Everything you need.", "Delivered to you."]}
+                typingSpeed={75}
+                pauseDuration={1500}
+                showCursor={true}
+                cursorCharacter="|"
+                textColors={["#ffffff", "#febd69"]}
+              />
             </h1>
 
             <p className="text-zinc-400 text-lg mt-6 max-w-xl">
